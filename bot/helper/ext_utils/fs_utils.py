@@ -74,6 +74,8 @@ def get_base_name(orig_path: str):
         return orig_path.replace(".bz2", "")
     elif orig_path.endswith(".gz"):
         return orig_path.replace(".gz", "")
+    elif orig_path.endswith(".tar.xz"):
+        return orig_path.replace(".tar.xz", "")
     elif orig_path.endswith(".tar"):
         return orig_path.replace(".tar", "")
     elif orig_path.endswith(".tbz2"):
@@ -145,5 +147,5 @@ def get_base_name(orig_path: str):
 def get_mime_type(file_path):
     mime = magic.Magic(mime=True)
     mime_type = mime.from_file(file_path)
-    mime_type = mime_type if mime_type else "text/plain"
+    mime_type = mime_type or "text/plain"
     return mime_type

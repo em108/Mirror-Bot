@@ -51,7 +51,13 @@ from bot.helper.mirror_utils.upload_utils import gdriveTools
 from bot.helper.telegram_helper import button_build
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import *
+from bot.helper.telegram_helper.message_utils import (
+    delete_all_messages,
+    sendMarkup,
+    sendMessage,
+    sendStatusMessage,
+    update_all_messages,
+)
 
 ariaDlManager = AriaDownloadHelper()
 ariaDlManager.start_listener()
@@ -283,24 +289,23 @@ def _mirror(bot, update, isTar=False, extract=False):
             not bot_utils.is_url(link)
             and not bot_utils.is_magnet(link)
             or len(link) == 0
-        ):
-            if file is not None:
-                if file.mime_type != "application/x-bittorrent":
-                    listener = MirrorListener(bot, update, pswd, isTar, tag, extract)
-                    tg_downloader = TelegramDownloadHelper(listener)
-                    tg_downloader.add_download(
-                        reply_to, f"{DOWNLOAD_DIR}{listener.uid}/", name
-                    )
-                    sendStatusMessage(update, bot)
-                    if len(Interval) == 0:
-                        Interval.append(
-                            setInterval(
-                                DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages
-                            )
+        ) and file is not None:
+            if file.mime_type != "application/x-bittorrent":
+                listener = MirrorListener(bot, update, pswd, isTar, tag, extract)
+                tg_downloader = TelegramDownloadHelper(listener)
+                tg_downloader.add_download(
+                    reply_to, f"{DOWNLOAD_DIR}{listener.uid}/", name
+                )
+                sendStatusMessage(update, bot)
+                if len(Interval) == 0:
+                    Interval.append(
+                        setInterval(
+                            DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages
                         )
-                    return
-                else:
-                    link = file.get_file().file_path
+                    )
+                return
+            else:
+                link = file.get_file().file_path
     else:
         tag = None
     if not bot_utils.is_url(link) and not bot_utils.is_magnet(link):

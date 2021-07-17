@@ -4,9 +4,15 @@ from time import sleep
 from aria2p import API
 
 from bot import aria2, download_dict_lock
-from bot.helper.ext_utils.bot_utils import *
+from bot.helper.ext_utils.bot_utils import (
+    LOGGER,
+    download_dict,
+    getDownloadByGid,
+    is_magnet,
+    new_thread,
+)
 from bot.helper.mirror_utils.status_utils.aria_download_status import AriaDownloadStatus
-from bot.helper.telegram_helper.message_utils import *
+from bot.helper.telegram_helper.message_utils import update_all_messages
 
 from .download_helper import DownloadHelper
 
@@ -30,15 +36,16 @@ class AriaDownloadHelper(DownloadHelper):
         if download.followed_by_ids:
             new_gid = download.followed_by_ids[0]
             new_download = api.get_download(new_gid)
+            if dl is None:
+                dl = getDownloadByGid(new_gid)
             with download_dict_lock:
                 download_dict[dl.uid()] = AriaDownloadStatus(new_gid, dl.getListener())
                 if new_download.is_torrent:
                     download_dict[dl.uid()].is_torrent = True
             update_all_messages()
             LOGGER.info(f"Changed gid from {gid} to {new_gid}")
-        else:
-            if dl:
-                threading.Thread(target=dl.getListener().onDownloadComplete).start()
+        elif dl:
+            threading.Thread(target=dl.getListener().onDownloadComplete).start()
 
     @new_thread
     def __onDownloadPause(self, api, gid):

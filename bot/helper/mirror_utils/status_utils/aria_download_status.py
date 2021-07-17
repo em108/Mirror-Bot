@@ -24,6 +24,9 @@ class AriaDownloadStatus(Status):
 
     def __update(self):
         self.__download = get_download(self.__gid)
+        download = self.__download
+        if download.followed_by_ids:
+            self.__gid = download.followed_by_ids[0]
 
     def progress(self):
         """
@@ -61,14 +64,13 @@ class AriaDownloadStatus(Status):
     def status(self):
         download = self.aria_download()
         if download.is_waiting:
-            status = MirrorStatus.STATUS_WAITING
+            return MirrorStatus.STATUS_WAITING
         elif download.is_paused:
-            status = MirrorStatus.STATUS_CANCELLED
+            return MirrorStatus.STATUS_CANCELLED
         elif download.has_failed:
-            status = MirrorStatus.STATUS_FAILED
+            return MirrorStatus.STATUS_FAILED
         else:
-            status = MirrorStatus.STATUS_DOWNLOADING
-        return status
+            return MirrorStatus.STATUS_DOWNLOADING
 
     def aria_download(self):
         self.__update()
